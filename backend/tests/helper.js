@@ -1,6 +1,3 @@
-process.env.DATABASE_PATH = ':memory:'
-process.env.SECRET_KEY = 'test-secret'
-
 import request from 'supertest'
 import app from '../server.js'
 import db from '../db.js'
