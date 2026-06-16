@@ -23,11 +23,11 @@ SubTracker is a single-user (with simple multi-user support) web application for
 
 | Layer | Technology |
 |-------|------------|
-| Backend | Python 3.12 + FastAPI + SQLModel |
+| Backend | Node.js 22 + Express + better-sqlite3 |
 | Database | SQLite (single file, persisted via Docker volume) |
 | Frontend | React 18 + Vite |
-| Auth | Session cookies with bcrypt password hashing |
-| Container | Single Dockerfile; Python serves static build + API |
+| Auth | Session cookies with bcryptjs password hashing |
+| Container | Single Dockerfile; Node serves static build + API |
 | Styling | Tailwind CSS + custom CSS variables |
 
 ## 3. Data Model
