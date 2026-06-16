@@ -4,6 +4,9 @@ import { requireAuth } from '../middleware/auth.js'
 
 const router = Router()
 
+const VALID_CYCLES = ['weekly', 'monthly', 'yearly']
+const VALID_CURRENCIES = ['EGP', 'USD']
+
 function rowToSubscription(row) {
   return {
     id: row.id,
@@ -21,6 +24,27 @@ function rowToSubscription(row) {
   }
 }
 
+function validateSubscription(data) {
+  const { name, cost, currency, cycle, next_renewal } = data
+  if (!name || typeof name !== 'string' || name.trim().length === 0) {
+    return 'Name is required'
+  }
+  const costNum = parseFloat(cost)
+  if (!Number.isFinite(costNum) || costNum < 0) {
+    return 'Cost must be a positive number'
+  }
+  if (!VALID_CURRENCIES.includes(currency)) {
+    return 'Currency must be EGP or USD'
+  }
+  if (!VALID_CYCLES.includes(cycle)) {
+    return 'Cycle must be weekly, monthly, or yearly'
+  }
+  if (!next_renewal || !/^\d{4}-\d{2}-\d{2}$/.test(next_renewal)) {
+    return 'Next renewal must be a valid date (YYYY-MM-DD)'
+  }
+  return null
+}
+
 router.get('/', requireAuth, (req, res) => {
   const rows = db.prepare(
     'SELECT * FROM subscriptions WHERE user_id = ? ORDER BY next_renewal ASC'
@@ -29,11 +53,14 @@ router.get('/', requireAuth, (req, res) => {
 })
 
 router.post('/', requireAuth, (req, res) => {
+  const error = validateSubscription(req.body)
+  if (error) return res.status(400).json({ detail: error })
+
   const { name, cost, currency, cycle, next_renewal, category, notes, active } = req.body
   const result = db.prepare(
     `INSERT INTO subscriptions (user_id, name, cost, currency, cycle, next_renewal, category, notes, active)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(req.user.id, name, cost, currency, cycle, next_renewal, category || 'Uncategorized', notes || null, active !== false ? 1 : 0)
+  ).run(req.user.id, name.trim(), parseFloat(cost), currency, cycle, next_renewal, category?.trim() || 'Uncategorized', notes?.trim() || null, active === false ? 0 : 1)
   const row = db.prepare('SELECT * FROM subscriptions WHERE id = ?').get(result.lastInsertRowid)
   res.status(201).json(rowToSubscription(row))
 })
@@ -48,16 +75,21 @@ router.put('/:id', requireAuth, (req, res) => {
   const existing = db.prepare('SELECT * FROM subscriptions WHERE id = ? AND user_id = ?').get(req.params.id, req.user.id)
   if (!existing) return res.status(404).json({ detail: 'Not found' })
 
+  if (Object.keys(req.body).some((k) => ['cost', 'currency', 'cycle', 'next_renewal', 'name'].includes(k))) {
+    const error = validateSubscription({ ...existing, ...req.body })
+    if (error) return res.status(400).json({ detail: error })
+  }
+
   const fields = []
   const values = []
   const { name, cost, currency, cycle, next_renewal, category, notes, active } = req.body
-  if (name !== undefined) { fields.push('name = ?'); values.push(name) }
-  if (cost !== undefined) { fields.push('cost = ?'); values.push(cost) }
+  if (name !== undefined) { fields.push('name = ?'); values.push(name.trim()) }
+  if (cost !== undefined) { fields.push('cost = ?'); values.push(parseFloat(cost)) }
   if (currency !== undefined) { fields.push('currency = ?'); values.push(currency) }
   if (cycle !== undefined) { fields.push('cycle = ?'); values.push(cycle) }
   if (next_renewal !== undefined) { fields.push('next_renewal = ?'); values.push(next_renewal) }
-  if (category !== undefined) { fields.push('category = ?'); values.push(category) }
-  if (notes !== undefined) { fields.push('notes = ?'); values.push(notes) }
+  if (category !== undefined) { fields.push('category = ?'); values.push(category?.trim()) }
+  if (notes !== undefined) { fields.push('notes = ?'); values.push(notes?.trim()) }
   if (active !== undefined) { fields.push('active = ?'); values.push(active ? 1 : 0) }
   if (fields.length === 0) return res.status(400).json({ detail: 'No fields to update' })
 

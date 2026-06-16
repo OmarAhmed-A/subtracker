@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.js'
 import subscriptionRoutes from './routes/subscriptions.js'
 import dashboardRoutes from './routes/dashboard.js'
 import settingsRoutes from './routes/settings.js'
+import SqliteSessionStore from './session-store.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -19,7 +20,7 @@ app.use(session({
   secret: process.env.SECRET_KEY || 'dev-secret-change-in-production',
   resave: false,
   saveUninitialized: false,
-  store: new session.MemoryStore(),
+  store: new SqliteSessionStore(),
   cookie: {
     httpOnly: true,
     secure: false,

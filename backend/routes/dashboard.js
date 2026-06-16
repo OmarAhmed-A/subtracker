@@ -28,9 +28,11 @@ router.get('/', requireAuth, async (req, res) => {
   const today = new Date().toISOString().split('T')[0]
   const upcoming = rows.find((sub) => sub.next_renewal >= today) || null
 
+  const safeMonthly = Number.isFinite(monthlyTotal) ? monthlyTotal : 0
+
   res.json({
-    monthly_total: Math.round(monthlyTotal * 100) / 100,
-    yearly_total: Math.round(monthlyTotal * 12 * 100) / 100,
+    monthly_total: Math.round(safeMonthly * 100) / 100,
+    yearly_total: Math.round(safeMonthly * 12 * 100) / 100,
     active_count: rows.length,
     upcoming: upcoming ? {
       id: upcoming.id,

@@ -8,4 +8,6 @@ backend/data/
 *.db
 .superpowers/
 .playwright-cli/
+subtracker-image.tar
+
 
