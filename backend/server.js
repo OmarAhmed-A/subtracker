@@ -48,6 +48,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ detail: 'Internal server error' })
 })
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`SubTracker running on port ${PORT}`)
-})
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`SubTracker running on port ${PORT}`)
+  })
+}
+
+export default app
