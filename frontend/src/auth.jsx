@@ -9,21 +9,21 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     api.get('/auth/me')
-      .then((res) => setUser(res.data))
+      .then((data) => setUser(data))
       .catch(() => setUser(null))
       .finally(() => setLoading(false))
   }, [])
 
   const login = async (username, password) => {
     await api.post('/auth/login', { username, password })
-    const res = await api.get('/auth/me')
-    setUser(res.data)
+    const data = await api.get('/auth/me')
+    setUser(data)
   }
 
   const register = async (username, password) => {
     await api.post('/auth/register', { username, password })
-    const res = await api.get('/auth/me')
-    setUser(res.data)
+    const data = await api.get('/auth/me')
+    setUser(data)
   }
 
   const logout = async () => {

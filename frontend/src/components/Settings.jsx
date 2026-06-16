@@ -10,8 +10,8 @@ export default function Settings({ onBack }) {
 
   useEffect(() => {
     api.get('/settings')
-      .then((res) => {
-        setRate(res.data.usd_to_egp)
+      .then((data) => {
+        setRate(data.usd_to_egp)
         setLoading(false)
       })
       .catch((err) => {

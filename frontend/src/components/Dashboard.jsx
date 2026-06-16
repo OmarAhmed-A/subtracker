@@ -16,12 +16,12 @@ export default function Dashboard() {
   const load = async () => {
     setLoading(true)
     try {
-      const [subsRes, dashRes] = await Promise.all([
+      const [subs, dashboard] = await Promise.all([
         api.get('/subscriptions'),
         api.get(`/dashboard?currency=${currency}`),
       ])
-      setSubs(subsRes.data)
-      setDashboard(dashRes.data)
+      setSubs(subs)
+      setDashboard(dashboard)
     } finally {
       setLoading(false)
     }
