@@ -4,10 +4,12 @@ import Layout from './components/Layout'
 import Login from './components/Login'
 import Register from './components/Register'
 import Dashboard from './components/Dashboard'
+import Settings from './components/Settings'
 
 function Router() {
   const { user, loading } = useAuth()
   const [isLogin, setIsLogin] = useState(true)
+  const [page, setPage] = useState('dashboard')
 
   if (loading) return <div className="p-8 text-center text-slate-400">Loading...</div>
   if (!user) return (
@@ -16,8 +18,8 @@ function Router() {
     </Layout>
   )
   return (
-    <Layout>
-      <Dashboard />
+    <Layout page={page} onChangePage={setPage}>
+      {page === 'settings' ? <Settings onBack={() => setPage('dashboard')} /> : <Dashboard />}
     </Layout>
   )
 }

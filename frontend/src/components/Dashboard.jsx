@@ -11,14 +11,20 @@ export default function Dashboard() {
   const [currency, setCurrency] = useState('USD')
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [loading, setLoading] = useState(true)
 
   const load = async () => {
-    const [subsRes, dashRes] = await Promise.all([
-      api.get('/subscriptions'),
-      api.get(`/dashboard?currency=${currency}`),
-    ])
-    setSubs(subsRes.data)
-    setDashboard(dashRes.data)
+    setLoading(true)
+    try {
+      const [subsRes, dashRes] = await Promise.all([
+        api.get('/subscriptions'),
+        api.get(`/dashboard?currency=${currency}`),
+      ])
+      setSubs(subsRes.data)
+      setDashboard(dashRes.data)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -42,6 +48,11 @@ export default function Dashboard() {
     await load()
   }
 
+  const handleToggleActive = async (sub) => {
+    await api.put(`/subscriptions/${sub.id}`, { active: !sub.active })
+    await load()
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -49,9 +60,11 @@ export default function Dashboard() {
         <CurrencyToggle value={currency} onChange={setCurrency} />
       </div>
 
-      {dashboard && <SummaryCards dashboard={dashboard} currency={currency} />}
+      {loading && <p className="text-center text-slate-400">Loading...</p>}
 
-      {dashboard?.upcoming && (
+      {!loading && dashboard && <SummaryCards dashboard={dashboard} currency={currency} />}
+
+      {!loading && dashboard?.upcoming && (
         <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4">
           <div className="text-sm text-slate-400">Upcoming renewal</div>
           <div className="mt-1 flex items-center justify-between">
@@ -61,10 +74,12 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div>
-        <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-slate-400">Subscriptions</h3>
-        <SubscriptionList subscriptions={subs} onEdit={(sub) => { setEditing(sub); setShowForm(true) }} onDelete={handleDelete} />
-      </div>
+      {!loading && (
+        <div>
+          <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-slate-400">Subscriptions</h3>
+          <SubscriptionList subscriptions={subs} onEdit={(sub) => { setEditing(sub); setShowForm(true) }} onDelete={handleDelete} onToggleActive={handleToggleActive} />
+        </div>
+      )}
 
       <button onClick={() => { setEditing(null); setShowForm(true) }} className="fixed bottom-6 right-6 flex h-14 w-14 items-center justify-center rounded-full bg-sky-600 text-2xl text-white shadow-lg hover:bg-sky-500">
         +

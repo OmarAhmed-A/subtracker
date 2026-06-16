@@ -7,6 +7,7 @@ import { existsSync } from 'fs'
 import authRoutes from './routes/auth.js'
 import subscriptionRoutes from './routes/subscriptions.js'
 import dashboardRoutes from './routes/dashboard.js'
+import settingsRoutes from './routes/settings.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const app = express()
@@ -30,6 +31,7 @@ app.use(session({
 app.use('/api/auth', authRoutes)
 app.use('/api/subscriptions', subscriptionRoutes)
 app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/settings', settingsRoutes)
 
 const staticDir = join(__dirname, '..', 'frontend', 'dist')
 if (existsSync(staticDir)) {
