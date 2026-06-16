@@ -1,9 +1,16 @@
 import './setup.js'
-import { describe, it } from 'node:test'
+import { describe, it, before } from 'node:test'
 import assert from 'node:assert'
 import { createAgent, registerUser } from './helper.js'
 
 describe('dashboard', () => {
+  before(() => {
+    globalThis.fetch = async () => ({
+      ok: true,
+      json: async () => ({ result: 'success', rates: { EGP: 50 } }),
+    })
+  })
+
   it('converts totals to EGP', async () => {
     const agent = createAgent()
     await registerUser(agent, 'user5', 'secret')

@@ -71,6 +71,13 @@ export default function Dashboard() {
       </button>
 
       {showForm && <SubscriptionForm subscription={editing} onSave={handleSave} onCancel={() => { setShowForm(false); setEditing(null) }} />}
+
+      <p className="pt-8 text-center text-xs text-slate-500">
+        Rates by{' '}
+        <a href="https://www.exchangerate-api.com" target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-slate-300 underline">
+          Exchange Rate API
+        </a>
+      </p>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import db from '../db.js'
 import { requireAuth } from '../middleware/auth.js'
+import { getUsdToEgp, convert } from '../services/currency.js'
 
 const router = Router()
 
@@ -10,17 +11,9 @@ const CYCLE_MULTIPLIERS = {
   yearly: 1 / 12,
 }
 
-function convert(amount, fromCurrency, toCurrency, rate) {
-  if (fromCurrency === toCurrency) return amount
-  if (fromCurrency === 'USD' && toCurrency === 'EGP') return amount * rate
-  if (fromCurrency === 'EGP' && toCurrency === 'USD') return amount / rate
-  throw new Error('Unsupported currency conversion')
-}
-
-router.get('/', requireAuth, (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
   const currency = req.query.currency === 'EGP' ? 'EGP' : 'USD'
-  const rateRow = db.prepare("SELECT value FROM settings WHERE key = 'usd_to_egp'").get()
-  const rate = parseFloat(rateRow?.value || '50.0')
+  const rate = await getUsdToEgp()
 
   const rows = db.prepare(
     'SELECT * FROM subscriptions WHERE user_id = ? AND active = 1 ORDER BY next_renewal ASC'
