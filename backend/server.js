@@ -18,6 +18,7 @@ app.use(session({
   secret: process.env.SECRET_KEY || 'dev-secret-change-in-production',
   resave: false,
   saveUninitialized: false,
+  store: new session.MemoryStore(),
   cookie: {
     httpOnly: true,
     secure: false,
@@ -33,7 +34,7 @@ app.use('/api/dashboard', dashboardRoutes)
 const staticDir = join(__dirname, '..', 'frontend', 'dist')
 if (existsSync(staticDir)) {
   app.use(express.static(staticDir))
-  app.get('*', (req, res) => {
+  app.get(/.*/, (req, res) => {
     res.sendFile(join(staticDir, 'index.html'))
   })
 } else {

@@ -1,0 +1,13 @@
+services:
+  subtracker:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - subtracker-data:/app/data
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+    restart: unless-stopped
+
+volumes:
+  subtracker-data:
